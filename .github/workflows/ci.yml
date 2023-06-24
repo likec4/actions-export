@@ -1,0 +1,23 @@
+name: ci
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: run action
+        uses: ./ # Uses an action in the root directory
+        with:
+          src: test/tutorial
+          output: out/tutorial
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: tutorial
+          path: out/tutorial
