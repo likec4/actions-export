@@ -2,7 +2,6 @@
   "name": "puppeteer-runner",
   "private": true,
   "dependencies": {
-    "puppeteer": "20.7.3"
   }
 }
  

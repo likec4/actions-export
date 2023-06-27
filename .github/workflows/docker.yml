@@ -5,9 +5,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'version to release. Ex: v1.0.2'
+        description: 'version to release. Ex: v1.0.1'
         required: true
-        default: 'v1.0.'
+        default: 'v1.0.1'
       # puppeteer_version:
       #   description: 'puppeteer version'
       #   required: false
@@ -30,33 +30,33 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Retrieve Current Release Version
-        # shellcheck disable=SC2062
-        run: |
-          RELEASE_VERSION="${{ github.event.inputs.version }}"          
+      # - name: Retrieve Current Release Version
+      #   # shellcheck disable=SC2062
+      #   run: |
+      #     RELEASE_VERSION="${{ github.event.inputs.version }}"          
 
-          if [ -z "${RELEASE_VERSION}" ]; then
-            echo "No release version found in environment, using event..."
-            RELEASE_VERSION="${{ github.event.release.name }}"
-          fi
+      #     if [ -z "${RELEASE_VERSION}" ]; then
+      #       echo "No release version found in environment, using event..."
+      #       RELEASE_VERSION="${{ github.event.release.name }}"
+      #     fi
 
-          # Check the RELEASE_VERSION again
-          if [ -z "${RELEASE_VERSION}" ]; then
-            echo "Error RELEASE_VERSION is empty. Exiting..."
-            exit 1
-          fi
+      #     # Check the RELEASE_VERSION again
+      #     if [ -z "${RELEASE_VERSION}" ]; then
+      #       echo "Error RELEASE_VERSION is empty. Exiting..."
+      #       exit 1
+      #     fi
 
-          if ! echo "${RELEASE_VERSION}" | grep -E -o "v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+"; then
-            echo "Error: RELEASE_VERSION doesn't look like a semantic version: ${RELEASE_VERSION}"
-            exit 2
-          fi
+      #     if ! echo "${RELEASE_VERSION}" | grep -E -o "v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+"; then
+      #       echo "Error: RELEASE_VERSION doesn't look like a semantic version: ${RELEASE_VERSION}"
+      #       exit 2
+      #     fi
 
-          {
-            echo "RELEASE_VERSION=${RELEASE_VERSION}"
-            echo "SEMVER_VERSION=${RELEASE_VERSION#v}"
-            echo "SEMVER_MAJOR_VERSION=${SEMVER_VERSION%%.*}"
-            echo "SEMVER_MAJOR_VERSION_WITH_PREFIX=v${SEMVER_MAJOR_VERSION}"
-          } >> "${GITHUB_ENV}"
+      #     {
+      #       echo "RELEASE_VERSION=${RELEASE_VERSION}"
+      #       echo "SEMVER_VERSION=${RELEASE_VERSION#v}"
+      #       echo "SEMVER_MAJOR_VERSION=${SEMVER_VERSION%%.*}"
+      #       echo "SEMVER_MAJOR_VERSION_WITH_PREFIX=v${SEMVER_MAJOR_VERSION}"
+      #     } >> "${GITHUB_ENV}"
 
       - name: Setup Docker BuildX
         uses: docker/setup-buildx-action@v2.5.0
@@ -75,8 +75,7 @@ jobs:
           no-cache: true
           push: true
           tags: |            
-            ghcr.io/${{ github.repository }}:${{ env.RELEASE_VERSION }}
-            ghcr.io/${{ github.repository }}:${{ env.SEMVER_MAJOR_VERSION_WITH_PREFIX }}
+            ghcr.io/${{ github.repository }}:${{ github.event.inputs.version }}
             ghcr.io/${{ github.repository }}:latest
 
       # - name: Start ${{ matrix.images.environment }} Deployment
