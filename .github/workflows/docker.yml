@@ -76,6 +76,7 @@ jobs:
           push: true
           tags: |            
             ghcr.io/${{ github.repository }}:${{ github.event.inputs.version }}
+            ghcr.io/${{ github.repository }}:v1
             ghcr.io/${{ github.repository }}:latest
 
       # - name: Start ${{ matrix.images.environment }} Deployment

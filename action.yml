@@ -13,7 +13,8 @@ inputs:
 
 runs:
   using: 'docker'
-  image: 'Dockerfile'
+  # image: 'Dockerfile'
+  image: 'docker://ghcr.io/likec4/actions-export:v1'
   args:
     - ${{ inputs.out }}
     - ${{ inputs.src }}    
