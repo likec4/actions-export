@@ -1,12 +1,12 @@
-name: Export LikeC4 views to png
-description: Export LikeC4 views to png, rendering in Headless Chrome
+name: LikeC4 Export
+description: Export LikeC4 views to png
 author: likec4
 inputs:
   src:
     description: directory with likec4 sources
     required: false
     default: '.'
-  output:
+  out:
     description: directory for generated png
     required: false
     default: '.'
@@ -15,7 +15,7 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.output }}
+    - ${{ inputs.out }}
     - ${{ inputs.src }}    
 
 branding:
