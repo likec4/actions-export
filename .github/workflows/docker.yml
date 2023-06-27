@@ -1,20 +1,20 @@
 ---
-name: Release
+name: docker
 
 on:
   workflow_dispatch:
     inputs:
-      release_version:
+      version:
         description: 'version to release. Ex: v1.0.2'
         required: true
         default: 'v1.0.'
-      puppeteer_version:
-        description: 'puppeteer version'
-        required: false
-        default: '20.7.3'
+      # puppeteer_version:
+      #   description: 'puppeteer version'
+      #   required: false
+      #   default: '20.7.3'
 
 jobs:
-  release:
+  release_images:
     name: Release Images
     runs-on: ubuntu-latest
     permissions:
@@ -22,13 +22,12 @@ jobs:
       deployments: write
       issues: write
       packages: write
-    timeout-minutes: 60
+    timeout-minutes: 20
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
-          ref: main
           # Full git history is needed to get a proper list of commits and tags
           fetch-depth: 0
 
@@ -74,10 +73,11 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
+          no-cache: true
           push: true
-          tags: |
-            ghcr.io/${{ github.repository }}:${{ SEMVER_MAJOR_VERSION_WITH_PREFIX }}
+          tags: |            
             ghcr.io/${{ github.repository }}:${{ env.RELEASE_VERSION }}
+            ghcr.io/${{ github.repository }}:${{ env.SEMVER_MAJOR_VERSION_WITH_PREFIX }}
             ghcr.io/${{ github.repository }}:latest
 
       # - name: Start ${{ matrix.images.environment }} Deployment
