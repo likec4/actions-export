@@ -21,4 +21,6 @@ RUN cd /puppeteer-runner \
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
+ENV LIKEC4_NO_SANDBOX="true"
+
 RUN npm install -g @likec4/cli@latest
