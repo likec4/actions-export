@@ -14,17 +14,14 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY puppeteer-runner /puppeteer-runner
-
-ARG PUPPETEER_VER=20.7.3
-
-RUN cd /puppeteer-runner \
-    && npm add puppeteer@$PUPPETEER_VER
-
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 ENV LIKEC4_NO_SANDBOX="true"
 
-ARG LIKEC4_VER=latest
+ARG PUPPETEER_VER=20.7.3 \
+    LIKEC4_VER=latest
 
-RUN npm install -g @likec4/cli@$LIKEC4_VER
+RUN cd /puppeteer-runner \
+    && npm add puppeteer@$PUPPETEER_VER
+    && npm install -g @likec4/cli@$LIKEC4_VER

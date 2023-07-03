@@ -1,24 +1,31 @@
 ---
-name: docker
+name: release
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'version to release. Ex: v1.0.1'
+        description: 'version to release. Ex: v1.0.2'
         required: true
         default: 'v1.0.1'
-      # puppeteer_version:
-      #   description: 'puppeteer version'
-      #   required: false
-      #   default: '20.7.3'
+      likec4_cli_version:
+        description: '@likec4/cli version'
+        required: false
+        default: 'latest'
+      puppeteer_version:
+        description: 'puppeteer version'
+        required: false
+        default: '20.7.3'
+
+env:
+  MAJOR_RELEASE_VERSION: v1
 
 jobs:
-  release_images:
+  release:
     name: Release Images
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       deployments: write
       issues: write
       packages: write
@@ -41,15 +48,20 @@ jobs:
       #     fi
 
       #     # Check the RELEASE_VERSION again
-      #     if [ -z "${RELEASE_VERSION}" ]; then
-      #       echo "Error RELEASE_VERSION is empty. Exiting..."
-      #       exit 1
-      #     fi
+      #     # if [ -z "${RELEASE_VERSION}" ]; then
+      #     #  echo "Error RELEASE_VERSION is empty. Exiting..."
+      #     #  exit 1
+      #     # fi
 
-      #     if ! echo "${RELEASE_VERSION}" | grep -E -o "v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+"; then
-      #       echo "Error: RELEASE_VERSION doesn't look like a semantic version: ${RELEASE_VERSION}"
-      #       exit 2
-      #     fi
+      #     # if ! echo "${RELEASE_VERSION}" | grep -E -o "v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+"; then
+      #     #   echo "Error: RELEASE_VERSION doesn't look like a semantic version: ${RELEASE_VERSION}"
+      #     #   exit 2
+      #     # fi
+
+      #     echo "RELEASE_VERSION=${RELEASE_VERSION}"
+      #     echo "SEMVER_VERSION=${RELEASE_VERSION#v}"
+      #     echo "SEMVER_MAJOR_VERSION=${SEMVER_VERSION%%.*}"
+      #     echo "SEMVER_MAJOR_VERSION_WITH_PREFIX=v${SEMVER_MAJOR_VERSION}"
 
       #     {
       #       echo "RELEASE_VERSION=${RELEASE_VERSION}"
@@ -59,24 +71,28 @@ jobs:
       #     } >> "${GITHUB_ENV}"
 
       - name: Setup Docker BuildX
-        uses: docker/setup-buildx-action@v2.5.0
+        uses: docker/setup-buildx-action@v2
 
       - name: Login to GHCR
-        uses: docker/login-action@v2.0.0
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Push Image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
-          no-cache: true
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            LIKEC4_VER=${{ github.event.inputs.likec4_cli_version }}
+            PUPPETEER_VER=${{ github.event.inputs.puppeteer_version }}
           tags: |            
             ghcr.io/${{ github.repository }}:${{ github.event.inputs.version }}
-            ghcr.io/${{ github.repository }}:v1
+            ghcr.io/${{ github.repository }}:${{ env.MAJOR_RELEASE_VERSION }}
             ghcr.io/${{ github.repository }}:latest
 
       # - name: Start ${{ matrix.images.environment }} Deployment
@@ -96,16 +112,39 @@ jobs:
       #     dst: |
       #       ghcr.io/github/super-linter:${{ matrix.images.prefix }}v5
       #       ghcr.io/github/super-linter:${{ matrix.images.prefix }}${{ env.RELEASE_VERSION }}
+      
+      - name: create release tag
+        env:
+          RELEASE_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"          
+          git tag --force "${MAJOR_RELEASE_VERSION}" "${RELEASE_VERSION}^{}"
+          git tag --force latest "${RELEASE_VERSION}^{}"
+          git push --force origin "refs/tags/${MAJOR_RELEASE_VERSION}" "refs/tags/latest"
+
 
       # We use ^{} to recursively deference the tag to get the commit the tag is pointing at.
       # Then, we use that reference to create new tags, so that the new tags point to the commit
       # the original tag was pointing to, and not to the original tag.
       # This notation is documented at https://git-scm.com/docs/gitrevisions#Documentation/gitrevisions.txt-emltrevgtemegemv0998em
-      # - name: Update Major Version and Latest Git Tag
-      #   run: |
-      #     git tag --force "${SEMVER_MAJOR_VERSION_WITH_PREFIX}" "${RELEASE_VERSION}^{}"
-      #     git tag --force latest "${RELEASE_VERSION}^{}"
-      #     git push --force origin "refs/tags/${SEMVER_MAJOR_VERSION_WITH_PREFIX}" "refs/tags/latest"
+      - name: create release tags
+        env:
+          RELEASE_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"          
+          git tag "${RELEASE_VERSION}"
+          git push --tags
+
+      - name: update release tags
+        env:
+          RELEASE_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          git tag --force latest "${RELEASE_VERSION}^{}"
+          git tag --force "${MAJOR_RELEASE_VERSION}" "${RELEASE_VERSION}^{}"
+          git push --force origin "refs/tags/${MAJOR_RELEASE_VERSION}" "refs/tags/latest"
+
 
       # - name: Update ${{ matrix.images.environment }} Deployment
       #   uses: bobheadxi/deployments@v1.4.0
