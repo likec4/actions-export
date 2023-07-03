@@ -90,11 +90,11 @@ jobs:
           build-args: |
             LIKEC4_VER=${{ github.event.inputs.likec4_cli_version }}
             PUPPETEER_VER=${{ github.event.inputs.puppeteer_version }}
-          tags: |            
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:${{ github.event.inputs.version }}
             ghcr.io/${{ github.repository }}:${{ env.MAJOR_RELEASE_VERSION }}
-            ghcr.io/${{ github.repository }}:latest
-
+            
       # - name: Start ${{ matrix.images.environment }} Deployment
       #   uses: bobheadxi/deployments@v1.4.0
       #   id: deployment
@@ -112,17 +112,6 @@ jobs:
       #     dst: |
       #       ghcr.io/github/super-linter:${{ matrix.images.prefix }}v5
       #       ghcr.io/github/super-linter:${{ matrix.images.prefix }}${{ env.RELEASE_VERSION }}
-      
-      - name: create release tag
-        env:
-          RELEASE_VERSION: ${{ github.event.inputs.version }}
-        run: |
-          git config user.name "${GITHUB_ACTOR}"
-          git config user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"          
-          git tag --force "${MAJOR_RELEASE_VERSION}" "${RELEASE_VERSION}^{}"
-          git tag --force latest "${RELEASE_VERSION}^{}"
-          git push --force origin "refs/tags/${MAJOR_RELEASE_VERSION}" "refs/tags/latest"
-
 
       # We use ^{} to recursively deference the tag to get the commit the tag is pointing at.
       # Then, we use that reference to create new tags, so that the new tags point to the commit
@@ -134,17 +123,13 @@ jobs:
         run: |
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"          
-          git tag "${RELEASE_VERSION}"
+          git tag ${RELEASE_VERSION}
           git push --tags
-
-      - name: update release tags
-        env:
-          RELEASE_VERSION: ${{ github.event.inputs.version }}
-        run: |
-          git tag --force latest "${RELEASE_VERSION}^{}"
+          
           git tag --force "${MAJOR_RELEASE_VERSION}" "${RELEASE_VERSION}^{}"
-          git push --force origin "refs/tags/${MAJOR_RELEASE_VERSION}" "refs/tags/latest"
-
+          git tag --force latest "${RELEASE_VERSION}^{}"
+          
+          git push --force origin "refs/tags/${MAJOR_RELEASE_VERSION}" "refs/tags/latest"              
 
       # - name: Update ${{ matrix.images.environment }} Deployment
       #   uses: bobheadxi/deployments@v1.4.0
