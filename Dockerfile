@@ -23,5 +23,5 @@ ARG PUPPETEER_VER=20.7.3 \
     LIKEC4_VER=latest
 
 RUN cd /puppeteer-runner \
-    && npm add puppeteer@$PUPPETEER_VER
+    && npm add puppeteer@$PUPPETEER_VER \
     && npm install -g @likec4/cli@$LIKEC4_VER
