@@ -19,7 +19,7 @@ ENTRYPOINT ["/entrypoint.sh"]
 
 ENV LIKEC4_NO_SANDBOX="true"
 
-ARG PUPPETEER_VER=21.0.3 \
+ARG PUPPETEER_VER=20.7.3 \
     LIKEC4_VER=latest
 
 RUN cd /puppeteer-runner \

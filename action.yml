@@ -13,7 +13,7 @@ inputs:
 
 runs:
   using: docker
-  image: docker://ghcr.io/likec4/actions-export:v1.0.8
+  image: docker://ghcr.io/likec4/actions-export:v1.0.9
   args:
     - ${{ inputs.out }}
     - ${{ inputs.src }}
