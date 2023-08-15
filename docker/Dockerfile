@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM node:20-bullseye-slim
 
 # Install latest chrome dev package and fonts to support major charsets (Chinese, Japanese, Arabic, Hebrew, Thai and a few others)
@@ -13,8 +14,7 @@ RUN apt-get update \
         --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-COPY puppeteer-runner /puppeteer-runner
-COPY entrypoint.sh /entrypoint.sh
+COPY . /
 ENTRYPOINT ["/entrypoint.sh"]
 
 ENV LIKEC4_NO_SANDBOX="true"

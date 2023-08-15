@@ -19,6 +19,7 @@ on:
 
 env:
   MAJOR_RELEASE_VERSION: v1
+  MINOR_RELEASE_VERSION: v1.0
 
 jobs:
   release:
@@ -93,6 +94,7 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:${{ github.event.inputs.version }}
+            ghcr.io/${{ github.repository }}:${{ env.MINOR_RELEASE_VERSION }}
             ghcr.io/${{ github.repository }}:${{ env.MAJOR_RELEASE_VERSION }}
             
       # - name: Start ${{ matrix.images.environment }} Deployment
@@ -127,9 +129,18 @@ jobs:
           git push --tags
           
           git tag --force "${MAJOR_RELEASE_VERSION}" "${RELEASE_VERSION}^{}"
+          git tag --force "${MINOR_RELEASE_VERSION}" "${RELEASE_VERSION}^{}"
           git tag --force latest "${RELEASE_VERSION}^{}"
           
           git push --force origin "refs/tags/${MAJOR_RELEASE_VERSION}" "refs/tags/latest"              
+          git push --force origin "refs/tags/${MINOR_RELEASE_VERSION}" "refs/tags/latest"
+  
+      - name: create release
+        env:
+          RELEASE_VERSION: ${{ github.event.inputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${RELEASE_VERSION} --draft --title ${RELEASE_VERSION}
 
       # - name: Update ${{ matrix.images.environment }} Deployment
       #   uses: bobheadxi/deployments@v1.4.0

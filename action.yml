@@ -12,12 +12,11 @@ inputs:
     default: '.'
 
 runs:
-  using: 'docker'
-  # image: 'Dockerfile'
-  image: 'docker://ghcr.io/likec4/actions-export:v1'
+  using: docker
+  image: docker://ghcr.io/likec4/actions-export:${{ github.action_ref || 'latest' }}
   args:
     - ${{ inputs.out }}
-    - ${{ inputs.src }}    
+    - ${{ inputs.src }}
 
 branding:
   icon: image
