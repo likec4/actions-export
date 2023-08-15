@@ -5,9 +5,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'version to release. Ex: v1.0.2'
+        description: 'version to release. Ex: v1.0.8'
         required: true
-        default: 'v1.0.1'
+        default: 'v1.0.8'
       likec4_cli_version:
         description: '@likec4/cli version'
         required: false

@@ -1,6 +1,10 @@
 {
   "name": "puppeteer-runner",
   "private": true,
+  "engines": {
+    "node": ">=16"
+  },
+  "engineStrict": true,
   "dependencies": {
   }
 }
