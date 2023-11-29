@@ -1,3 +1,6 @@
+>
+> ⚠️⚠️⚠️  This template is deprecated in favor of the [github.com/likec4/actions](https://github.com/likec4/actions)
+
 # LikeC4 Export
 
 Export LikeC4 views to png.
